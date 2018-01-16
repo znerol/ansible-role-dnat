@@ -1,0 +1,14 @@
+[Service]
+
+ExecStartPost=/sbin/iptables -t nat -N {{ dnat_unit_chain }}
+{% for port in dnat_ports %}
+ExecStartPost=/usr/bin/wait-for-it {{ dnat_destination }}:{{ port.port }}
+ExecStartPost=/sbin/iptables -t nat -A {{ dnat_system_chain }} -i {{ dnat_iface }} -p {{ port.proto }} -m {{ port.proto }} --dport {{ port.port }} -j {{ dnat_unit_chain }}
+{% endfor %}
+ExecStartPost=/bin/sh -c '/usr/bin/getent hosts {{ dnat_destination }} | /usr/bin/cut -d" " -f1 | /usr/bin/xargs -n1 /sbin/iptables -t nat -A {{ dnat_unit_chain }} -j DNAT --to-destination'
+
+{% for port in dnat_ports %}
+ExecStopPost=/sbin/iptables -t nat -D {{ dnat_system_chain }} -i {{ dnat_iface }} -p {{ port.proto }} -m {{ port.proto }} --dport {{ port.port }} -j {{ dnat_unit_chain }}
+{% endfor %}
+ExecStopPost=/sbin/iptables -t nat -F {{ dnat_unit_chain }}
+ExecStopPost=/sbin/iptables -t nat -X {{ dnat_unit_chain }}

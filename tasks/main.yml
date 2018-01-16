@@ -1,0 +1,17 @@
+- name: Systemd unit override directory
+  file:
+    dest: /etc/systemd/system/{{ dnat_decorated_unit }}.d/
+    state: directory
+  when: dnat_ports
+
+- name: Systemd unit override for automatic DNAT
+  template:
+    src: dnat-override.j2
+    dest: /etc/systemd/system/{{ dnat_decorated_unit }}.d/dnat.conf
+  when: dnat_ports
+
+- name: Systemd unit override for automatic DNAT absent
+  file:
+    path: /etc/systemd/system/{{ dnat_decorated_unit }}.d/dnat.conf
+    state: absent
+  when: not dnat_ports

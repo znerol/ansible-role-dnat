@@ -1,0 +1,9 @@
+dnat_name: "{{ inventory_hostname_short }}"
+
+dnat_destination: "{{ inventory_hostname }}"
+dnat_iface: "eth0"
+dnat_system_chain: PREROUTING
+
+dnat_decorated_unit: "{{ dnat_name}}.service"
+dnat_unit_chain_prefix: "ANSIBLE_DNAT_"
+dnat_unit_chain: "{{ dnat_unit_chain_prefix }}{{ dnat_name }}"
